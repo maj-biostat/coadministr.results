@@ -1,0 +1,324 @@
+---
+title: "Coadministration of covid and flu vaccination"
+subtitle: "Design 2: Operating Characteristics"
+date: Apr 9, 2021
+author: MAJ
+output:
+  xaringan::moon_reader:
+    self_contained: true
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+---
+
+
+```{css, echo = FALSE}
+.pull-left-tiny {
+  float: left;
+  width: 47%;
+  font-size: 12px;
+}
+.pull-right-tiny {
+  float: right;
+  width: 47%;
+  font-size: 12px;
+}
+```
+
+<!--
+## -----------------------------------------------------------------------------
+##
+## Script name: design2.Rmd
+##
+## Purpose of script: extract summaries from the simulation outputs
+##
+## Author: MAJ
+##
+## Date Created: 2021-04-07
+##
+## -----------------------------------------------------------------------------
+##
+## Renders pre-made figures and tables obtained from `process_results.R` script
+## into a xaringan presentation.
+##
+## -----------------------------------------------------------------------------
+-->
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+## Introduction
+
++ Mod/Sev AE in covid 19 vaccination coadministered with flu vs. coadministered with placebo vaccine
+
++ Two brands (AZ and PF) with two doses
+
++ Participants enrol **either** at time of covid dose 1 (cohort 1) or 2 (cohort 2) 
+
++ Membership to cohort 1 and cohort 2 is mutually exclusive
+
++ Participants in each cohort are randomised to:
+  + arm 1: CVD+FLU followed by PBO 7 days later
+  + arm 2: CVD+PBO followed by FLU 7 days later
+  
+
+
+<!--
+Partially pool over dose
+
++ We adopt the occurrence of moderate (or worse) reaction by day 7 as the (dichotomised) outcome of interest and evaluate whether:
+  1. coadminstration of covid 19 and flu vaccinations has an unacceptable level of reactivity relative to administration of covid 19 alone;  
+  
+  2. coadministration of covid 19 and flu vaccinations results in no more than a 20% increase (in absolute terms) in reactivity relative to administration of covid 19 alone.
+  -->
+
+---
+class: left, top
+## Introduction
+
++ Variation in both the brand and cohort (first or second dose of CVD vaccination)
+
+```{r, out.width='90%', out.height='50%', fig.align='center'}
+knitr::include_graphics('../fig/design2.png')
+```
+
++ Simulations look at CVD+FLU vs. CVD+PBO by brand and cohort (ignore FLU vs. PBO data)
+
+  + Secondary - compare brands AZ vs PF
+  + Secondary - compare coad vs. mono
+
+---
+class: left, top
+## Data
+
++ Single random dataset
+
+```{r, out.width='70%', out.height='35%', fig.align='center'}
+knitr::include_graphics('../fig/dat_ex1.png')
+```
+
+---
+class: left, top
+## Model
+
++ Proportion with mod/sev AE (CVD+FLU vs CVD+PBO)
+
++ Partially pool across cohort and brand
+
+$$
+\begin{aligned}
+\mathsf{Y}_{ijk} &\sim \mathsf{Bin}(n_{ijk}, \theta_{ijk}) \\
+\theta_{ijk} &\sim \mathsf{Beta}(a_{k}, b_{k}) \\
+\mu_{k} &\sim \mathsf{Beta}(1, 1) \\
+\eta_{k} &\sim \mathsf{Exponential}(\eta_0)
+\end{aligned}
+$$
+
++ For cohort $i$ brand $j$ and coadministration arm $k$ with $a_k = \mu_k \eta_k$ and $b_k = (1-\mu_k) \eta_k$
+
++ Independent treatment arms;
+  + arm 1: CVD+FLU followed by PBO 7 days later, $k=1$
+  + arm 2: CVD+PBO followed by FLU 7 days later, $k=2$
+
++ Scales to more brands or additional coadministration arms (CVD+X) with shared control (CVD+PBO)
+
+---
+class: left, top
+## Adaptation and decisions
+
++ Trial progression directed on evaluating the following identities:
+
+$$
+\begin{aligned}
+\text{Pr}&(\theta_{i,j,k=2} - \theta_{i,j,k=1} > 0) > \gamma_1 \implies \text{Inferior} \\
+\text{Pr}&(\theta_{i,j,k=2} - \theta_{i,j,k=1} < \delta) > \gamma_2 \implies \text{Non-inferior} 
+\end{aligned}
+$$
+
++ Inferior: higher proportion of mod/sev AE in CVD+FLU relative to CVD+PBO by brand and cohort
+
++ Non-inferior: proportion of mod/sev AE in CVD+FLU is no more than $\delta$ above proportion of mod/sev AE in CVD+PBO by brand and cohort
+
++ Trial recruitment for brand $k$ (both cohorts) suspended if either Inferiority or Non-inferiority triggered
+
++ $\theta_{i, j, k}$ probabilities of mod/sev reactions in CVD+FLU vs. CVD+PBO
+  
++ $\delta = 0.2$ non-inferiority margin and 
+  
++ $\gamma_z$ decision (inferiority, non-inferiority) thresholds specified to maintain an appropriate false positive rate for all $Z$ rules
+
+<!-- .footnote[Should inferiority/non-inferiority be symmetrical?] -->
+
+---
+class: left, top
+## Simulation
+
+Assumes:
+
++ maximum of 1000 participants
++ enrolled 2000 per year
++ interim analyses from 500 to 1000, by 100
++ probability of reaction
+  + AZ dose 1: 0.5, AZ dose 2: 0.4
+  + PF dose 1: 0.3, PF dose 2: 0.5
++ effect sizes from 0 to 30% (in absolute terms)
++ non-inferiority margin of 20% (in absolute terms)
++ followup at 6.5 to 7.5 days after administration
++ 15% loss to followup
++ fixed randomisation 1:1 stratified by cohort and brand
++ 50% chance of being in either cohort
++ 70% chance of getting AZ
+
+
+---
+class: left, top
+## Power (inferiority)
+
++ Power based solely on evaluating inferiority rule
+
+```{r, out.width='75%', out.height='50%', fig.align='center'}
+knitr::include_graphics('../fig/pwr_inf2.png')
+```
+
+---
+class: left, top
+## Sample size (inferiority)
+
++ Expected sample size based solely on evaluating inferiority rule
+
+```{r, out.width='75%', out.height='50%', fig.align='center'}
+knitr::include_graphics('../fig/n_inf2.png')
+```
+
+---
+class: left, top
+## Power and sample size (inferiority)
+
++ When effect size is zero, power indicates a false decision (we stopped the trial because we thought covid + flu was more reactive, when in fact it was not)
+
+.pull-left[
+.center[AZ]
+]
+.pull-right[
+.center[PF]
+]
+.pull-left-tiny[
+|    Effect size| Power| N| SD_N|
+|-----:|------:|----:|----:|
+
+]
+.pull-right-tiny[
+|    Effect size| Power| N| SD_N|
+|-----:|------:|----:|----:|
+
+]
+
+
+
+---
+class: left, top
+## Power (noninferiority)
+
++ Power based solely on evaluating noninferiority rule
+
+```{r, out.width='75%', out.height='50%', fig.align='center'}
+knitr::include_graphics('../fig/pwr_ninf2.png')
+```
+
+---
+class: left, top
+## Sample size (noninferiority)
+
++ Expected sample size based solely on evaluating noninferiority rule
+
+```{r, out.width='75%', out.height='50%', fig.align='center'}
+knitr::include_graphics('../fig/n_ninf2.png')
+```
+
+---
+class: left, top
+## Power and sample size (noninferiority)
+
++ When effect size is greater than NI margin (0.2) power indicates a false decision (we stopped the trial because we thought covid + flu was no more than 20% reactive, when in fact it was not)
+
+.pull-left[
+.center[AZ]
+]
+.pull-right[
+.center[PF]
+]
+.pull-left-tiny[
+|    Effect size| Power| N| SD_N|
+|-----:|------:|----:|----:|
+
+]
+.pull-right-tiny[
+|    Effect size| Power| N| SD_N|
+|-----:|------:|----:|----:|
+
+]
+
+---
+class: left, top
+## Power (inferiority and noninferiority)
+
++ Power based on evaluating inferiority and noninferiority rules
+
+```{r, out.width='75%', out.height='50%', fig.align='center'}
+knitr::include_graphics('../fig/pwr_cmb2.png')
+```
+
+
+---
+class: left, top
+## Sample size (inferiority and noninferiority)
+
++ Expected sample size based on evaluating inferiority and noninferiority rules
+
+```{r, out.width='75%', out.height='50%', fig.align='center'}
+knitr::include_graphics('../fig/n_cmb2.png')
+```
+
+---
+class: left, top
+## Power and sample size (inferiority and noninferiority)
+
+.pull-left[
+.center[AZ]
+]
+.pull-right[
+.center[PF]
+]
+.pull-left-tiny[
+|    Effect size| Power| N| SD_N|
+|-----:|------:|----:|----:|
+| 0.000|  1.000|  587|  150|
+| 0.050|  1.000|  733|  210|
+| 0.075|  1.000|  824|  205|
+| 0.100|  1.000|  877|  183|
+| 0.125|  1.000|  880|  182|
+| 0.150|  0.999|  829|  198|
+| 0.200|  1.000|  665|  188|
+| 0.225|  0.999|  597|  151|
+| 0.250|  0.998|  549|  106|
+| 0.300|  1.000|  510|   45|
+
+]
+.pull-right-tiny[
+|    Effect size| Power| N| SD_N|
+|-----:|------:|----:|----:|
+| 0.000|  1.000|  750|  215|
+| 0.050|  0.996|  899|  176|
+| 0.075|  0.986|  938|  149|
+| 0.100|  0.969|  969|  105|
+| 0.125|  0.940|  969|  108|
+| 0.150|  0.908|  947|  134|
+| 0.200|  0.842|  835|  202|
+| 0.225|  0.808|  759|  209|
+| 0.250|  0.839|  675|  190|
+| 0.300|  0.922|  583|  133|
+]
